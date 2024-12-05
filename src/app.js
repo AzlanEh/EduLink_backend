@@ -22,9 +22,11 @@ app.use(express.static("public"));
 // Routes Import
 
 import userRouter from "./routes/users.routes.js";
+import contentRouter from "./routes/content.routes.js";
 
 // Routes Decleration
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/content", contentRouter);
 
 export { app };

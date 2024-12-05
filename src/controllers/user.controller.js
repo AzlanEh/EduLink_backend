@@ -209,4 +209,17 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiRespons(200, req.user, "User fetched successfully"));
 });
 
-export { signUpUser, logInUser, logOutUser, updateAccessToken, getCurrentUser };
+const adminController = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiRespons(200, req.user._id, "admin dashboard successfully"));
+});
+
+export {
+  signUpUser,
+  logInUser,
+  logOutUser,
+  updateAccessToken,
+  getCurrentUser,
+  adminController,
+};
