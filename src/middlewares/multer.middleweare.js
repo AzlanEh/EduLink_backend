@@ -2,7 +2,7 @@ import multer from "multer";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./public/temp"); // Ensure this directory exists
+    cb(null, "./public/temp"); // Temporary local storage
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);

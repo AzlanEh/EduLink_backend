@@ -24,6 +24,7 @@ const uploadContent = asyncHandler(async (req, res) => {
     description,
     type,
     fileURL: result.url, // Set fileURL field
+    duration: result.duration,
     instructorId: req.user.id, // Set createdBy using the user ID from JWT
   });
 
@@ -31,24 +32,48 @@ const uploadContent = asyncHandler(async (req, res) => {
 });
 
 const getContent = asyncHandler(async (req, res) => {
-  const { type, page = 1, limit = 10 } = req.query;
+  const {
+    type,
+    title,
+    uploadedBy,
+    startDate,
+    endDate,
+    sortBy = "createdAt",
+    order = "desc",
+    page = 1,
+    limit = 10,
+  } = req.query;
 
-  const filter = type ? { type } : {};
-  const skip = (page - 1) * limit;
+  const filter = {};
+  if (type) filter.type = type;
+  if (title) filter.title = { $regex: title, $options: "i" }; // Case-insensitive search
+  if (uploadedBy) filter.instructorId = uploadedBy;
+  if (startDate && endDate) {
+    filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+  }
+
+  const pageNum = Math.max(1, Number(page));
+  const limitNum = Math.max(1, Math.min(Number(limit), 100)); // Maximum limit of 100
+  const skip = (pageNum - 1) * limitNum;
+  const sortOrder = order === "desc" ? -1 : 1;
 
   const content = await Content.find(filter)
     .populate("instructorId", "username email")
     .skip(skip)
-    .limit(Number(limit));
+    .limit(limitNum)
+    .sort({ [sortBy]: sortOrder });
 
   const total = await Content.countDocuments(filter);
 
   res.status(200).json(
     new ApiRespons(true, "Content retrieved successfully", {
+      metadata: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
+      },
       content,
-      total,
-      page: Number(page),
-      limit: Number(limit),
     })
   );
 });

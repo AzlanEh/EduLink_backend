@@ -16,14 +16,21 @@ const uploadToCloudinary = async (localFilePath) => {
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
     });
+
     await fs.unlink(localFilePath);
     // console.log("file is uploded no Cloudinary ", response);
 
-    return { url: response.secure_url, public_id: response.public_id };
+    return {
+      url: response.secure_url,
+      public_id: response.public_id,
+      duration: response.duration || null, // Duration in seconds for video/audio
+      format: response.format, // File format (e.g., mp4, pdf)
+      type: response.resource_type, // File type (e.g., video, image)
+    };
   } catch (error) {
     await fs.unlink(localFilePath); // Remove the locally saved file as the uplode opration got failed
 
-    console.error("ERROR --> ", error);
+    console.error("Cloudinary Upload Error:", error);
     return null;
   }
 };
